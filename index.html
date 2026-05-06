@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assembly Availability — stat.io</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; padding: 16px; font-size: 14px; }
+  h1 { font-size: 17px; font-weight: 700; color: #0f172a; }
+  .subtitle { color: #64748b; font-size: 12px; margin-top: 2px; margin-bottom: 14px; }
+  .summary { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .summary-card { flex: 1; min-width: 80px; border-radius: 10px; padding: 10px 12px; cursor: pointer; transition: opacity 0.15s; }
+  .summary-card:hover { opacity: 0.85; }
+  .summary-card .count { font-size: 26px; font-weight: 800; line-height: 1; }
+  .summary-card .label { font-size: 11px; margin-top: 3px; font-weight: 500; }
+  .card-red { background: #fef2f2; border: 1px solid #fecaca; }
+  .card-yellow { background: #fefce8; border: 1px solid #fde68a; }
+  .card-green { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .card-total { background: #f1f5f9; border: 1px solid #e2e8f0; }
+  .count-red { color: #dc2626; }
+  .count-yellow { color: #ca8a04; }
+  .count-green { color: #16a34a; }
+  .count-total { color: #475569; }
+  .controls { display: flex; gap: 7px; margin-bottom: 11px; flex-wrap: wrap; align-items: center; }
+  .search { flex: 1; min-width: 150px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 11px; color: #1e293b; font-size: 13px; outline: none; }
+  .search:focus { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.15); }
+  .filter-btn { padding: 6px 11px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #475569; font-size: 12px; cursor: pointer; transition: all 0.12s; font-weight: 500; }
+  .filter-btn:hover { background: #f1f5f9; }
+  .filter-btn.active-all { background: #eef2ff; border-color: #a5b4fc; color: #4338ca; }
+  .filter-btn.active-red { background: #fef2f2; border-color: #fca5a5; color: #dc2626; }
+  .filter-btn.active-yellow { background: #fefce8; border-color: #fde68a; color: #ca8a04; }
+  .filter-btn.active-green { background: #f0fdf4; border-color: #86efac; color: #16a34a; }
+  .items-grid { display: flex; flex-direction: column; gap: 5px; }
+  .item-card { border-radius: 9px; border: 1px solid; overflow: hidden; cursor: pointer; transition: box-shadow 0.1s; background: #fff; }
+  .item-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .item-card.red { border-color: #fecaca; }
+  .item-card.yellow { border-color: #fde68a; }
+  .item-card.green { border-color: #bbf7d0; }
+  .item-header { display: flex; align-items: center; gap: 10px; padding: 9px 12px; }
+  .badge { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 30px; border-radius: 7px; font-size: 15px; font-weight: 800; padding: 0 6px; flex-shrink: 0; }
+  .badge.red { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+  .badge.yellow { background: #fefce8; color: #ca8a04; border: 1px solid #fde68a; }
+  .badge.green { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+  .item-info { flex: 1; min-width: 0; }
+  .item-name { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0f172a; }
+  .item-meta { font-size: 11px; color: #64748b; margin-top: 2px; }
+  .expand-icon { font-size: 11px; color: #94a3b8; flex-shrink: 0; transition: transform 0.2s; }
+  .item-card.expanded .expand-icon { transform: rotate(180deg); }
+  .item-detail { display: none; padding: 0 12px 10px; }
+  .item-card.expanded .item-detail { display: block; }
+  .comp-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .comp-table th { text-align: left; padding: 4px 7px; color: #94a3b8; font-weight: 500; border-bottom: 1px solid #f1f5f9; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .comp-table td { padding: 4px 7px; border-bottom: 1px solid #f8fafc; color: #334155; }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr.bottleneck-row td { font-weight: 600; background: #fef2f2; }
+  .comp-table tr.bottleneck-row td:first-child::before { content: "⚠ "; }
+  .can-build-val { font-weight: 700; }
+  .can-build-val.limiting { color: #dc2626; }
+  .can-build-val.ok { color: #16a34a; }
+  .no-results { text-align: center; padding: 28px; color: #94a3b8; font-size: 13px; }
+  .updated-bar { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 8px; border-top: 1px solid #f1f5f9; }
+  .updated-text { font-size: 11px; color: #94a3b8; }
+  .refresh-note { font-size: 11px; color: #6366f1; font-weight: 500; }
+</style>
+</head>
+<body>
+<h1>Assembly Availability</h1>
+<p class="subtitle">Buildable units per product based on BOM component stock in Zoho Inventory</p>
+
+<div class="summary" id="summary"></div>
+
+<div class="controls">
+  <input class="search" type="text" placeholder="Search products or components..." id="searchInput" oninput="filterItems()">
+  <button class="filter-btn active-all" id="btn-all" onclick="setFilter('all')">All</button>
+  <button class="filter-btn" id="btn-red" onclick="setFilter('red')">🔴 Critical</button>
+  <button class="filter-btn" id="btn-yellow" onclick="setFilter('yellow')">🟡 Low</button>
+  <button class="filter-btn" id="btn-green" onclick="setFilter('green')">🟢 Healthy</button>
+</div>
+
+<div class="items-grid" id="itemsGrid"></div>
+
+<div class="updated-bar">
+  <span class="updated-text" id="updatedAt"></span>
+  <span class="refresh-note">↻ Refreshed daily at 7 AM</span>
+</div>
+
+<script>
+// DATA_PLACEHOLDER — replaced by daily refresh task
+const ASSEMBLY_DATA = [
+  {"name":"Flowstation - Replacement Pack","sku":"FS-REPLACEMENT-PACK","max_buildable":0,"bottleneck":"FS Burned Box","updated":"2026-05-06","components":[{"name":"FS Burned Box","qty_per":1,"available":0,"can_build":0},{"name":"FS HDMI Cable","qty_per":1,"available":60,"can_build":60},{"name":"FS POE Splitter","qty_per":1,"available":64,"can_build":64},{"name":"FS Barrel to USB C Splitter","qty_per":1,"available":116,"can_build":116}]},
+  {"name":"Flowstation Pack","sku":"FS-PACK","max_buildable":0,"bottleneck":"FS Burned Box","updated":"2026-05-06","components":[{"name":"FS Burned Box","qty_per":1,"available":0,"can_build":0},{"name":"FS Wireless Keyboard Mouse Combo","qty_per":1,"available":23,"can_build":23},{"name":"FS Remote Holders","qty_per":1,"available":42,"can_build":42},{"name":"FS HDMI Cable","qty_per":1,"available":60,"can_build":60},{"name":"FS POE Splitter","qty_per":1,"available":64,"can_build":64},{"name":"FS 2ft Black Patch Cables","qty_per":1,"available":83,"can_build":83},{"name":"FS Barrel to USB C Splitter","qty_per":1,"available":116,"can_build":116}]},
+  {"name":"FlowStation Pack (Rasp Pi)","sku":"","max_buildable":0,"bottleneck":"Flowstation (Rasp Pi)","updated":"2026-05-06","components":[{"name":"Flowstation (Rasp Pi)","qty_per":1,"available":0,"can_build":0},{"name":"FS Wireless Keyboard Mouse Combo","qty_per":1,"available":23,"can_build":23},{"name":"FS HDMI Cable","qty_per":1,"available":60,"can_build":60},{"name":"FS Wall mount (Raspi)","qty_per":1,"available":867,"can_build":867}]},
+  {"name":"Wireless Call Pull Cord","sku":"","max_buildable":0,"bottleneck":"Call Pull Cord (Complete)","updated":"2026-05-06","components":[{"name":"Call Pull Cord (Complete)","qty_per":1,"available":0,"can_build":0},{"name":"Wireless Call Screws","qty_per":2,"available":10,"can_build":5},{"name":"Wireless Call USB Extender","qty_per":1,"available":7,"can_build":7},{"name":"Wireless Call 2 Pin Connector","qty_per":1,"available":7,"can_build":7},{"name":"Wireless Call Box","qty_per":1,"available":11,"can_build":11},{"name":"Wireless Call PCB","qty_per":1,"available":82,"can_build":82},{"name":"Gateway Helical Antenna","qty_per":1,"available":113,"can_build":113},{"name":"Call Pull Cord PCB","qty_per":1,"available":451,"can_build":451},{"name":"Badge Full Size Battery","qty_per":1,"available":1185,"can_build":1185}]},
+  {"name":"Call Box 24 Port","sku":"CALL-BOX-24-PORT-CMPLT","max_buildable":1,"bottleneck":"Call Box 6 Port Panel","updated":"2026-05-06","components":[{"name":"Call Box 6 Port Panel","qty_per":4,"available":6,"can_build":1},{"name":"Call Keystone Jacks Black","qty_per":23,"available":40,"can_build":1},{"name":"Call Box","qty_per":1,"available":4,"can_build":4},{"name":"Call USB C POE Splitter","qty_per":1,"available":9,"can_build":9},{"name":"Patch Cable 1 FT Orange","qty_per":24,"available":402,"can_build":16},{"name":"Call Emergency Box PCB","qty_per":1,"available":28,"can_build":28},{"name":"FS SD Cards","qty_per":1,"available":44,"can_build":44},{"name":"Call Keystone Jacks Orange","qty_per":1,"available":50,"can_build":50},{"name":"FS Raspberry PI","qty_per":1,"available":124,"can_build":124}]},
+  {"name":"Call Box 18 Port","sku":"CALL-BOX-18-PORT-CMPLT","max_buildable":2,"bottleneck":"Call Box 6 Port Panel","updated":"2026-05-06","components":[{"name":"Call Box 6 Port Panel","qty_per":3,"available":6,"can_build":2},{"name":"Call Keystone Jacks Black","qty_per":17,"available":40,"can_build":2},{"name":"Call Box","qty_per":1,"available":4,"can_build":4},{"name":"Call USB C POE Splitter","qty_per":1,"available":9,"can_build":9},{"name":"Patch Cable 1 FT Orange","qty_per":18,"available":402,"can_build":22},{"name":"Call Box Blank Panel","qty_per":1,"available":26,"can_build":26},{"name":"Call Emergency Box PCB","qty_per":1,"available":28,"can_build":28},{"name":"FS SD Cards","qty_per":1,"available":44,"can_build":44},{"name":"Call Keystone Jacks Orange","qty_per":1,"available":50,"can_build":50},{"name":"FS Raspberry PI","qty_per":1,"available":124,"can_build":124}]},
+  {"name":"Call Box 12 Port","sku":"CALL-BOX-12-PORT-CMPLT","max_buildable":3,"bottleneck":"Call Box 6 Port Panel","updated":"2026-05-06","components":[{"name":"Call Box 6 Port Panel","qty_per":2,"available":6,"can_build":3},{"name":"Call Keystone Jacks Black","qty_per":11,"available":40,"can_build":3},{"name":"Call Box","qty_per":1,"available":4,"can_build":4},{"name":"Call USB C POE Splitter","qty_per":1,"available":9,"can_build":9},{"name":"Call Box Blank Panel","qty_per":2,"available":26,"can_build":13},{"name":"Call Emergency Box PCB","qty_per":1,"available":28,"can_build":28},{"name":"Patch Cable 1 FT Orange","qty_per":12,"available":402,"can_build":33},{"name":"FS SD Cards","qty_per":1,"available":44,"can_build":44},{"name":"Call Keystone Jacks Orange","qty_per":1,"available":50,"can_build":50},{"name":"FS Raspberry PI","qty_per":1,"available":124,"can_build":124}]},
+  {"name":"Call Box 6 Port","sku":"CALL-BOX-6-PORT-CMPLT","max_buildable":4,"bottleneck":"Call Box","updated":"2026-05-06","components":[{"name":"Call Box","qty_per":1,"available":4,"can_build":4},{"name":"Call Box 6 Port Panel","qty_per":1,"available":6,"can_build":6},{"name":"Call Box Blank Panel","qty_per":3,"available":26,"can_build":8},{"name":"Call Keystone Jacks Black","qty_per":5,"available":40,"can_build":8},{"name":"Call USB C POE Splitter","qty_per":1,"available":9,"can_build":9},{"name":"Call Emergency Box PCB","qty_per":1,"available":28,"can_build":28},{"name":"FS SD Cards","qty_per":1,"available":44,"can_build":44},{"name":"Call Keystone Jacks Orange","qty_per":1,"available":50,"can_build":50},{"name":"Patch Cable 1 FT Orange","qty_per":6,"available":402,"can_build":67},{"name":"FS Raspberry PI","qty_per":1,"available":124,"can_build":124}]},
+  {"name":"Wireless Call Bedside Nurse Button","sku":"","max_buildable":5,"bottleneck":"Wireless Call Screws","updated":"2026-05-06","components":[{"name":"Wireless Call Screws","qty_per":2,"available":10,"can_build":5},{"name":"Call Button Long Cable","qty_per":1,"available":6,"can_build":6},{"name":"Wireless Call USB Extender","qty_per":1,"available":7,"can_build":7},{"name":"Wireless Call 2 Pin Connector","qty_per":1,"available":7,"can_build":7},{"name":"Wireless Call Box","qty_per":1,"available":11,"can_build":11},{"name":"Call Wall Plate","qty_per":1,"available":23,"can_build":23},{"name":"Wireless Call PCB","qty_per":1,"available":82,"can_build":82},{"name":"Call PCB Plug (for long cord)","qty_per":1,"available":82,"can_build":82},{"name":"Gateway Helical Antenna","qty_per":1,"available":113,"can_build":113},{"name":"Badge Full Size Battery","qty_per":1,"available":1185,"can_build":1185}]},
+  {"name":"Wireless Call Emergency Button","sku":"","max_buildable":5,"bottleneck":"Wireless Call Screws","updated":"2026-05-06","components":[{"name":"Wireless Call Screws","qty_per":2,"available":10,"can_build":5},{"name":"Wireless Call USB Extender","qty_per":1,"available":7,"can_build":7},{"name":"Wireless Call 2 Pin Connector","qty_per":1,"available":7,"can_build":7},{"name":"Call Emergency Button Wall","qty_per":1,"available":8,"can_build":8},{"name":"Wireless Call Box","qty_per":1,"available":11,"can_build":11},{"name":"Wireless Call PCB","qty_per":1,"available":82,"can_build":82},{"name":"Gateway Helical Antenna","qty_per":1,"available":113,"can_build":113},{"name":"Call Emergency Wall Button PCB","qty_per":1,"available":142,"can_build":142},{"name":"Badge Full Size Battery","qty_per":1,"available":1185,"can_build":1185}]},
+  {"name":"Call Bedside Nurse Button","sku":"CALL-BEDSIDE-NURSE-BUTTON","max_buildable":6,"bottleneck":"Call Button Long Cable","updated":"2026-05-06","components":[{"name":"Call Button Long Cable","qty_per":1,"available":6,"can_build":6},{"name":"Call PCB Plug (for long cord)","qty_per":1,"available":82,"can_build":82}]},
+  {"name":"Call Emergency Wall Button (Complete)","sku":"CALL-EMERGENCY-WALL-BUTTON-CMPLT","max_buildable":8,"bottleneck":"Call Emergency Button Wall","updated":"2026-05-06","components":[{"name":"Call Emergency Button Wall","qty_per":1,"available":8,"can_build":8},{"name":"Call Wall Plate","qty_per":1,"available":23,"can_build":23},{"name":"Call Emergency Wall Button PCB","qty_per":1,"available":142,"can_build":142}]},
+  {"name":"Flowstation (Rasp Pi)","sku":"Flow100000","max_buildable":16,"bottleneck":"FS POE Hats","updated":"2026-05-06","components":[{"name":"FS POE Hats","qty_per":1,"available":16,"can_build":16},{"name":"FS Raspberry Pi Case","qty_per":1,"available":29,"can_build":29},{"name":"FS SD Cards","qty_per":1,"available":44,"can_build":44},{"name":"FS Raspberry PI","qty_per":1,"available":124,"can_build":124}]},
+  {"name":"Call Pull Cord (Complete)","sku":"CALL-PULL-CORD-CMPLT","max_buildable":17,"bottleneck":"Call Pull Cord Outlet","updated":"2026-05-06","components":[{"name":"Call Pull Cord Outlet","qty_per":1,"available":17,"can_build":17},{"name":"Call Pull Cord PCB","qty_per":1,"available":451,"can_build":451}]},
+  {"name":"Sensor Desktop","sku":"DESK-SENSOR-UNPROGRAMMED","max_buildable":30,"bottleneck":"Sensor Desktop Case","updated":"2026-05-06","components":[{"name":"Sensor Desktop Case","qty_per":1,"available":30,"can_build":30},{"name":"Sensor Desktop & Ceiling PCB","qty_per":1,"available":646,"can_build":646},{"name":"Badge Screws","qty_per":4,"available":6831,"can_build":1707},{"name":"Sensor Lenses","qty_per":1,"available":3316,"can_build":3316}]},
+  {"name":"Sensor Desktop (with cord & NO plug)","sku":"DESK-SENSOR-WCNP","max_buildable":51,"bottleneck":"Sensor Desktop","updated":"2026-05-06","components":[{"name":"Sensor Desktop","qty_per":1,"available":51,"can_build":51},{"name":"Micro USB Cable Under 15'","qty_per":1,"available":122,"can_build":122}]},
+  {"name":"Sensor Desktop (with cord & plug)","sku":"DESK-SENSOR-WCWP","max_buildable":51,"bottleneck":"Sensor Desktop","updated":"2026-05-06","components":[{"name":"Sensor Desktop","qty_per":1,"available":51,"can_build":51},{"name":"Micro USB Cable Under 15'","qty_per":1,"available":122,"can_build":122},{"name":"USB Wall Plug","qty_per":1,"available":200,"can_build":200}]},
+  {"name":"Badge Clip","sku":"CB-CMPLT","max_buildable":79,"bottleneck":"Badge Clip Batteries","updated":"2026-05-06","components":[{"name":"Badge Clip Batteries","qty_per":1,"available":79,"can_build":79},{"name":"Badge Clip Cases","qty_per":1,"available":138,"can_build":138},{"name":"Badge Clip PCB","qty_per":1,"available":143,"can_build":143},{"name":"Badge Clip Buttons","qty_per":1,"available":152,"can_build":152},{"name":"Badge Clip Rings","qty_per":1,"available":527,"can_build":527},{"name":"Badge Screws","qty_per":4,"available":6831,"can_build":1707}]},
+  {"name":"Sensor Plugin","sku":"PLUGIN-SENSOR-CMPLT","max_buildable":82,"bottleneck":"Sensor Plugin (no plug)","updated":"2026-05-06","components":[{"name":"Sensor Plugin (no plug)","qty_per":1,"available":82,"can_build":82},{"name":"USB Wall Plug","qty_per":1,"available":200,"can_build":200}]},
+  {"name":"Gateway","sku":"GW-CMPLT","max_buildable":90,"bottleneck":"Gateway Plastic Case","updated":"2026-05-06","components":[{"name":"Gateway Plastic Case","qty_per":1,"available":90,"can_build":90},{"name":"Gateway Type C USB Cable, 6 inch (White)","qty_per":1,"available":91,"can_build":91},{"name":"Gateway PCB","qty_per":1,"available":101,"can_build":101},{"name":"Gateway Helical Antenna","qty_per":1,"available":113,"can_build":113}]},
+  {"name":"Gateway 2.0 (without micro USB cable)","sku":"","max_buildable":90,"bottleneck":"Gateway Plastic Case","updated":"2026-05-06","components":[{"name":"Gateway Plastic Case","qty_per":1,"available":90,"can_build":90},{"name":"Gateway PCB","qty_per":1,"available":101,"can_build":101},{"name":"Gateway Helical Antenna","qty_per":1,"available":113,"can_build":113},{"name":"Sensor Ceiling Screws","qty_per":2,"available":4305,"can_build":2152}]},
+  {"name":"Tablet","sku":"TAB-CMPLT","max_buildable":143,"bottleneck":"Tablet USB Plug","updated":"2026-05-06","components":[{"name":"Tablet USB Plug","qty_per":1,"available":143,"can_build":143},{"name":"Dot Stickers (Box of 1,000)","qty_per":1,"available":348,"can_build":348},{"name":"Tablet (unprogrammed)","qty_per":1,"available":554,"can_build":554}]},
+  {"name":"Tablets (with sticker)","sku":"","max_buildable":143,"bottleneck":"Tablet USB Plug","updated":"2026-05-06","components":[{"name":"Tablet USB Plug","qty_per":1,"available":143,"can_build":143},{"name":"Dot Stickers (Box of 1,000)","qty_per":1,"available":348,"can_build":348},{"name":"Tablet (unprogrammed)","qty_per":1,"available":554,"can_build":554}]},
+  {"name":"Sensor Ceiling","sku":"CEIL-SENSOR-CMPLT","max_buildable":325,"bottleneck":"Sensor Ceiling Case","updated":"2026-05-06","components":[{"name":"Sensor Ceiling Case","qty_per":1,"available":325,"can_build":325},{"name":"Sensor Desktop & Ceiling PCB","qty_per":1,"available":646,"can_build":646},{"name":"Sensor Ceiling Metal Plate","qty_per":1,"available":835,"can_build":835},{"name":"Sensor Ceiling Screws","qty_per":4,"available":4305,"can_build":1076},{"name":"Sensor Ceiling Springs","qty_per":2,"available":3000,"can_build":1500}]},
+  {"name":"Sensor Plugin (no plug)","sku":"PLUGIN-SENSOR-UNPROGRAMMED","max_buildable":450,"bottleneck":"Sensor Plugin PCB","updated":"2026-05-06","components":[{"name":"Sensor Plugin PCB","qty_per":1,"available":450,"can_build":450},{"name":"Sensor Plugin Case","qty_per":1,"available":2002,"can_build":2002},{"name":"Sensor Lenses","qty_per":1,"available":3316,"can_build":3316}]},
+  {"name":"Badge Full Size","sku":"SB-FULL-CMPLT","max_buildable":454,"bottleneck":"Badge Safety Button","updated":"2026-05-06","components":[{"name":"Badge Safety Button","qty_per":1,"available":454,"can_build":454},{"name":"Badge Screws","qty_per":7,"available":6831,"can_build":975},{"name":"Case Badge Full Size","qty_per":1,"available":1132,"can_build":1132},{"name":"Badge Full Size Battery","qty_per":1,"available":1185,"can_build":1185},{"name":"Badge PCB","qty_per":1,"available":1343,"can_build":1343}]},
+  {"name":"Badge Mini","sku":"SB-MINI-CMPLT","max_buildable":454,"bottleneck":"Badge Safety Button","updated":"2026-05-06","components":[{"name":"Badge Safety Button","qty_per":1,"available":454,"can_build":454},{"name":"Badge PCB","qty_per":1,"available":1343,"can_build":1343},{"name":"Badge Screws","qty_per":4,"available":6831,"can_build":1707},{"name":"Case Badge Mini","qty_per":1,"available":1768,"can_build":1768},{"name":"Badge Mini Battery","qty_per":1,"available":1818,"can_build":1818}]},
+  {"name":"Stat Tag - White (NO badge strap)","sku":"STAT-TAG-CMPLT","max_buildable":1273,"bottleneck":"Stat Tag Batteries","updated":"2026-05-06","components":[{"name":"Stat Tag Batteries","qty_per":1,"available":1273,"can_build":1273},{"name":"Stat Tag White Case","qty_per":1,"available":1431,"can_build":1431},{"name":"Stat Tag Screws","qty_per":4,"available":9214,"can_build":2303},{"name":"Stat Tag PCB (1.0)","qty_per":1,"available":2634,"can_build":2634},{"name":"Stat Tag Shoulder Pads","qty_per":2,"available":8761,"can_build":4380}]},
+  {"name":"Stat Tag - White (with badge strap)","sku":"ST-WHITE-STRAP-CMPLT","max_buildable":1273,"bottleneck":"Stat Tag Batteries","updated":"2026-05-06","components":[{"name":"Stat Tag Batteries","qty_per":1,"available":1273,"can_build":1273},{"name":"Stat Tag White Case","qty_per":1,"available":1431,"can_build":1431},{"name":"Stat Tag Screws","qty_per":4,"available":9214,"can_build":2303},{"name":"Stat Tag Badge Straps","qty_per":1,"available":2434,"can_build":2434},{"name":"Stat Tag PCB (1.0)","qty_per":1,"available":2634,"can_build":2634},{"name":"Stat Tag Shoulder Pads","qty_per":2,"available":8761,"can_build":4380}]},
+  {"name":"Sensor Tablet","sku":"TAB-SENSOR-CMPLT","max_buildable":1658,"bottleneck":"Sensor Lenses","updated":"2026-05-06","components":[{"name":"Sensor Lenses","qty_per":2,"available":3316,"can_build":1658},{"name":"Sensor Tablet PCB","qty_per":1,"available":1994,"can_build":1994}]},
+  {"name":"Sensor Tablet (unprogrammed)","sku":"","max_buildable":1658,"bottleneck":"Sensor Lenses","updated":"2026-05-06","components":[{"name":"Sensor Lenses","qty_per":2,"available":3316,"can_build":1658},{"name":"Sensor Tablet PCB","qty_per":1,"available":1994,"can_build":1994}]}
+];
+
+const YELLOW_THRESHOLD = 20;
+function getStatus(n) { if (n <= 0) return 'red'; if (n <= YELLOW_THRESHOLD) return 'yellow'; return 'green'; }
+
+let activeFilter = 'all';
+
+function renderSummary() {
+  const red = ASSEMBLY_DATA.filter(d => getStatus(d.max_buildable) === 'red').length;
+  const yellow = ASSEMBLY_DATA.filter(d => getStatus(d.max_buildable) === 'yellow').length;
+  const green = ASSEMBLY_DATA.filter(d => getStatus(d.max_buildable) === 'green').length;
+  document.getElementById('summary').innerHTML = `
+    <div class="summary-card card-red" onclick="setFilter('red')"><div class="count count-red">${red}</div><div class="label">🔴 Can't Build</div></div>
+    <div class="summary-card card-yellow" onclick="setFilter('yellow')"><div class="count count-yellow">${yellow}</div><div class="label">🟡 Low (≤${YELLOW_THRESHOLD})</div></div>
+    <div class="summary-card card-green" onclick="setFilter('green')"><div class="count count-green">${green}</div><div class="label">🟢 Healthy</div></div>
+    <div class="summary-card card-total" onclick="setFilter('all')"><div class="count count-total">${ASSEMBLY_DATA.length}</div><div class="label">Total Products</div></div>
+  `;
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  ['all','red','yellow','green'].forEach(k => {
+    document.getElementById('btn-'+k).className = 'filter-btn' + (k === f ? ' active-'+k : '');
+  });
+  renderItems();
+}
+
+function filterItems() { renderItems(); }
+
+function renderItems() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let items = ASSEMBLY_DATA;
+  if (activeFilter !== 'all') items = items.filter(d => getStatus(d.max_buildable) === activeFilter);
+  if (q) items = items.filter(d =>
+    d.name.toLowerCase().includes(q) ||
+    (d.sku && d.sku.toLowerCase().includes(q)) ||
+    d.bottleneck.toLowerCase().includes(q) ||
+    d.components.some(c => c.name.toLowerCase().includes(q))
+  );
+
+  const grid = document.getElementById('itemsGrid');
+  if (!items.length) { grid.innerHTML = '<div class="no-results">No products match your filter.</div>'; return; }
+
+  grid.innerHTML = items.map((d, i) => {
+    const st = getStatus(d.max_buildable);
+    const displayNum = d.max_buildable <= 0 ? '0' : d.max_buildable >= 1000 ? (d.max_buildable/1000).toFixed(1)+'k' : d.max_buildable;
+    const comps = [...d.components].sort((a,b) => a.can_build - b.can_build);
+    const rows = comps.map(c => {
+      const isBN = c.name === d.bottleneck;
+      return `<tr class="${isBN ? 'bottleneck-row' : ''}">
+        <td>${c.name}</td>
+        <td style="text-align:right;color:#94a3b8">${c.qty_per > 1 ? '×'+c.qty_per : '×1'}</td>
+        <td style="text-align:right;color:#64748b">${c.available}</td>
+        <td style="text-align:right"><span class="can-build-val ${isBN ? 'limiting' : 'ok'}">${c.can_build}</span></td>
+      </tr>`;
+    }).join('');
+    return `<div class="item-card ${st}" id="card-${i}" onclick="toggleCard(${i})">
+      <div class="item-header">
+        <div class="badge ${st}">${displayNum}</div>
+        <div class="item-info">
+          <div class="item-name">${d.name}</div>
+          <div class="item-meta">Bottleneck: <strong>${d.bottleneck}</strong>${d.sku ? ' · ' + d.sku : ''}</div>
+        </div>
+        <div class="expand-icon">▼</div>
+      </div>
+      <div class="item-detail">
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th style="text-align:right">Per Unit</th><th style="text-align:right">In Stock</th><th style="text-align:right">Can Build</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCard(i) {
+  document.getElementById('card-'+i).classList.toggle('expanded');
+}
+
+const updated = ASSEMBLY_DATA[0]?.updated || 'unknown';
+document.getElementById('updatedAt').textContent = 'Last updated: ' + updated + ' · stat.io Zoho Inventory';
+renderSummary();
+renderItems();
+</script>
+</body>
+</html>
