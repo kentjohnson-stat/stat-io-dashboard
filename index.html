@@ -96,23 +96,194 @@
 // DATA_PLACEHOLDER — replaced by daily refresh task
 const ASSEMBLY_DATA = [
   {
+    "name": "Sensor Desktop",
+    "sku": "DESK-SENSOR-UNPROGRAMMED",
+    "max_buildable": -14,
+    "bottleneck": "Sensor Desktop Case",
+    "updated": "2026-07-01",
+    "components": [
+      {
+        "name": "Sensor Desktop Case",
+        "qty_per": 1.0,
+        "available": -14.0,
+        "can_build": -14
+      },
+      {
+        "name": "Sensor Desktop & Ceiling PCB",
+        "qty_per": 1.0,
+        "available": 523.0,
+        "can_build": 523
+      },
+      {
+        "name": "Sensor Lenses",
+        "qty_per": 1.0,
+        "available": 2193.0,
+        "can_build": 2193
+      },
+      {
+        "name": "Badge Screws",
+        "qty_per": 4.0,
+        "available": 5939.0,
+        "can_build": 1484
+      },
+      {
+        "name": "Self-Adhesive Clear Rubber Feet",
+        "qty_per": 4.0,
+        "available": 444.0,
+        "can_build": 111
+      }
+    ]
+  },
+  {
     "name": "Consolidated Sensor Plugin",
     "sku": "CONSOL-PLUGIN-SENSOR",
     "max_buildable": 0,
     "bottleneck": "Consolidated Sensor",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "USB Wall Plug",
-        "qty_per": 1,
-        "available": 345,
+        "qty_per": 1.0,
+        "available": 345.0,
         "can_build": 345
       },
       {
         "name": "Consolidated Sensor",
-        "qty_per": 1,
-        "available": 0,
+        "qty_per": 1.0,
+        "available": 0.0,
         "can_build": 0
+      }
+    ]
+  },
+  {
+    "name": "Call Box 24 Port",
+    "sku": "CALL-BOX-24-PORT-CMPLT",
+    "max_buildable": 2,
+    "bottleneck": "Call Keystone Jacks Black",
+    "updated": "2026-07-01",
+    "components": [
+      {
+        "name": "Call Box",
+        "qty_per": 1.0,
+        "available": 4.0,
+        "can_build": 4
+      },
+      {
+        "name": "Call Box 6 Port Panel",
+        "qty_per": 4.0,
+        "available": 36.0,
+        "can_build": 9
+      },
+      {
+        "name": "FS Raspberry PI",
+        "qty_per": 1.0,
+        "available": 124.0,
+        "can_build": 124
+      },
+      {
+        "name": "FS SD Cards",
+        "qty_per": 1.0,
+        "available": 44.0,
+        "can_build": 44
+      },
+      {
+        "name": "Call USB C POE Splitter",
+        "qty_per": 1.0,
+        "available": 9.0,
+        "can_build": 9
+      },
+      {
+        "name": "Call Emergency Box PCB",
+        "qty_per": 1.0,
+        "available": 28.0,
+        "can_build": 28
+      },
+      {
+        "name": "Patch Cable 1 FT Orange",
+        "qty_per": 24.0,
+        "available": 1694.0,
+        "can_build": 70
+      },
+      {
+        "name": "Call Keystone Jacks Black",
+        "qty_per": 23.0,
+        "available": 65.0,
+        "can_build": 2
+      },
+      {
+        "name": "Call Keystone Jacks Orange",
+        "qty_per": 1.0,
+        "available": 50.0,
+        "can_build": 50
+      }
+    ]
+  },
+  {
+    "name": "Call Box 18 Port",
+    "sku": "CALL-BOX-18-PORT-CMPLT",
+    "max_buildable": 3,
+    "bottleneck": "Call Keystone Jacks Black",
+    "updated": "2026-07-01",
+    "components": [
+      {
+        "name": "Call Box",
+        "qty_per": 1.0,
+        "available": 4.0,
+        "can_build": 4
+      },
+      {
+        "name": "Call Box 6 Port Panel",
+        "qty_per": 3.0,
+        "available": 36.0,
+        "can_build": 12
+      },
+      {
+        "name": "Call Box Blank Panel",
+        "qty_per": 1.0,
+        "available": 26.0,
+        "can_build": 26
+      },
+      {
+        "name": "FS Raspberry PI",
+        "qty_per": 1.0,
+        "available": 124.0,
+        "can_build": 124
+      },
+      {
+        "name": "FS SD Cards",
+        "qty_per": 1.0,
+        "available": 44.0,
+        "can_build": 44
+      },
+      {
+        "name": "Call USB C POE Splitter",
+        "qty_per": 1.0,
+        "available": 9.0,
+        "can_build": 9
+      },
+      {
+        "name": "Call Emergency Box PCB",
+        "qty_per": 1.0,
+        "available": 28.0,
+        "can_build": 28
+      },
+      {
+        "name": "Patch Cable 1 FT Orange",
+        "qty_per": 18.0,
+        "available": 1694.0,
+        "can_build": 94
+      },
+      {
+        "name": "Call Keystone Jacks Black",
+        "qty_per": 17.0,
+        "available": 65.0,
+        "can_build": 3
+      },
+      {
+        "name": "Call Keystone Jacks Orange",
+        "qty_per": 1.0,
+        "available": 50.0,
+        "can_build": 50
       }
     ]
   },
@@ -121,36 +292,36 @@ const ASSEMBLY_DATA = [
     "sku": "FS-REPLACEMENT-PACK",
     "max_buildable": 3,
     "bottleneck": "FS Burned Box",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "FS Burned Box",
-        "qty_per": 1,
-        "available": 3,
+        "qty_per": 1.0,
+        "available": 3.0,
         "can_build": 3
       },
       {
         "name": "FS HDMI Cable",
-        "qty_per": 1,
-        "available": 82,
-        "can_build": 82
+        "qty_per": 1.0,
+        "available": 132.0,
+        "can_build": 132
       },
       {
         "name": "FS Barrel to USB C Splitter",
-        "qty_per": 1,
-        "available": 110,
+        "qty_per": 1.0,
+        "available": 110.0,
         "can_build": 110
       },
       {
         "name": "FS POE Splitter",
-        "qty_per": 1,
-        "available": 89,
+        "qty_per": 1.0,
+        "available": 89.0,
         "can_build": 89
       },
       {
         "name": "FS ULINE Slider Zip Bags",
-        "qty_per": 1,
-        "available": 75,
+        "qty_per": 1.0,
+        "available": 75.0,
         "can_build": 75
       }
     ]
@@ -160,54 +331,54 @@ const ASSEMBLY_DATA = [
     "sku": "FS-PACK",
     "max_buildable": 3,
     "bottleneck": "FS Burned Box",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "FS Wireless Keyboard Mouse Combo",
-        "qty_per": 1,
-        "available": 57,
+        "qty_per": 1.0,
+        "available": 57.0,
         "can_build": 57
       },
       {
         "name": "FS HDMI Cable",
-        "qty_per": 1,
-        "available": 82,
-        "can_build": 82
+        "qty_per": 1.0,
+        "available": 132.0,
+        "can_build": 132
       },
       {
         "name": "FS 2ft Black Patch Cables",
-        "qty_per": 1,
-        "available": 79,
+        "qty_per": 1.0,
+        "available": 79.0,
         "can_build": 79
       },
       {
         "name": "FS Remote Holders",
-        "qty_per": 1,
-        "available": 78,
+        "qty_per": 1.0,
+        "available": 78.0,
         "can_build": 78
       },
       {
         "name": "FS Burned Box",
-        "qty_per": 1,
-        "available": 3,
+        "qty_per": 1.0,
+        "available": 3.0,
         "can_build": 3
       },
       {
         "name": "FS Barrel to USB C Splitter",
-        "qty_per": 1,
-        "available": 110,
+        "qty_per": 1.0,
+        "available": 110.0,
         "can_build": 110
       },
       {
         "name": "FS POE Splitter",
-        "qty_per": 1,
-        "available": 89,
+        "qty_per": 1.0,
+        "available": 89.0,
         "can_build": 89
       },
       {
         "name": "FS ULINE Slider Zip Bags",
-        "qty_per": 1,
-        "available": 75,
+        "qty_per": 1.0,
+        "available": 75.0,
         "can_build": 75
       }
     ]
@@ -217,198 +388,66 @@ const ASSEMBLY_DATA = [
     "sku": "CALL-BOX-12-PORT-CMPLT",
     "max_buildable": 4,
     "bottleneck": "Call Box",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "Call Box",
-        "qty_per": 1,
-        "available": 4,
+        "qty_per": 1.0,
+        "available": 4.0,
         "can_build": 4
       },
       {
         "name": "Call Box 6 Port Panel",
-        "qty_per": 2,
-        "available": 36,
+        "qty_per": 2.0,
+        "available": 36.0,
         "can_build": 18
       },
       {
         "name": "Call Box Blank Panel",
-        "qty_per": 2,
-        "available": 26,
+        "qty_per": 2.0,
+        "available": 26.0,
         "can_build": 13
       },
       {
         "name": "FS Raspberry PI",
-        "qty_per": 1,
-        "available": 124,
+        "qty_per": 1.0,
+        "available": 124.0,
         "can_build": 124
       },
       {
         "name": "FS SD Cards",
-        "qty_per": 1,
-        "available": 44,
+        "qty_per": 1.0,
+        "available": 44.0,
         "can_build": 44
       },
       {
         "name": "Call USB C POE Splitter",
-        "qty_per": 1,
-        "available": 9,
+        "qty_per": 1.0,
+        "available": 9.0,
         "can_build": 9
       },
       {
         "name": "Call Emergency Box PCB",
-        "qty_per": 1,
-        "available": 28,
+        "qty_per": 1.0,
+        "available": 28.0,
         "can_build": 28
       },
       {
         "name": "Patch Cable 1 FT Orange",
-        "qty_per": 12,
-        "available": 1694,
+        "qty_per": 12.0,
+        "available": 1694.0,
         "can_build": 141
       },
       {
         "name": "Call Keystone Jacks Black",
-        "qty_per": 11,
-        "available": 215,
-        "can_build": 19
+        "qty_per": 11.0,
+        "available": 65.0,
+        "can_build": 5
       },
       {
         "name": "Call Keystone Jacks Orange",
-        "qty_per": 1,
-        "available": 50,
-        "can_build": 50
-      }
-    ]
-  },
-  {
-    "name": "Call Box 18 Port",
-    "sku": "CALL-BOX-18-PORT-CMPLT",
-    "max_buildable": 4,
-    "bottleneck": "Call Box",
-    "updated": "2026-06-30",
-    "components": [
-      {
-        "name": "Call Box",
-        "qty_per": 1,
-        "available": 4,
-        "can_build": 4
-      },
-      {
-        "name": "Call Box 6 Port Panel",
-        "qty_per": 3,
-        "available": 36,
-        "can_build": 12
-      },
-      {
-        "name": "Call Box Blank Panel",
-        "qty_per": 1,
-        "available": 26,
-        "can_build": 26
-      },
-      {
-        "name": "FS Raspberry PI",
-        "qty_per": 1,
-        "available": 124,
-        "can_build": 124
-      },
-      {
-        "name": "FS SD Cards",
-        "qty_per": 1,
-        "available": 44,
-        "can_build": 44
-      },
-      {
-        "name": "Call USB C POE Splitter",
-        "qty_per": 1,
-        "available": 9,
-        "can_build": 9
-      },
-      {
-        "name": "Call Emergency Box PCB",
-        "qty_per": 1,
-        "available": 28,
-        "can_build": 28
-      },
-      {
-        "name": "Patch Cable 1 FT Orange",
-        "qty_per": 18,
-        "available": 1694,
-        "can_build": 94
-      },
-      {
-        "name": "Call Keystone Jacks Black",
-        "qty_per": 17,
-        "available": 215,
-        "can_build": 12
-      },
-      {
-        "name": "Call Keystone Jacks Orange",
-        "qty_per": 1,
-        "available": 50,
-        "can_build": 50
-      }
-    ]
-  },
-  {
-    "name": "Call Box 24 Port",
-    "sku": "CALL-BOX-24-PORT-CMPLT",
-    "max_buildable": 4,
-    "bottleneck": "Call Box",
-    "updated": "2026-06-30",
-    "components": [
-      {
-        "name": "Call Box",
-        "qty_per": 1,
-        "available": 4,
-        "can_build": 4
-      },
-      {
-        "name": "Call Box 6 Port Panel",
-        "qty_per": 4,
-        "available": 36,
-        "can_build": 9
-      },
-      {
-        "name": "FS Raspberry PI",
-        "qty_per": 1,
-        "available": 124,
-        "can_build": 124
-      },
-      {
-        "name": "FS SD Cards",
-        "qty_per": 1,
-        "available": 44,
-        "can_build": 44
-      },
-      {
-        "name": "Call USB C POE Splitter",
-        "qty_per": 1,
-        "available": 9,
-        "can_build": 9
-      },
-      {
-        "name": "Call Emergency Box PCB",
-        "qty_per": 1,
-        "available": 28,
-        "can_build": 28
-      },
-      {
-        "name": "Patch Cable 1 FT Orange",
-        "qty_per": 24,
-        "available": 1694,
-        "can_build": 70
-      },
-      {
-        "name": "Call Keystone Jacks Black",
-        "qty_per": 23,
-        "available": 215,
-        "can_build": 9
-      },
-      {
-        "name": "Call Keystone Jacks Orange",
-        "qty_per": 1,
-        "available": 50,
+        "qty_per": 1.0,
+        "available": 50.0,
         "can_build": 50
       }
     ]
@@ -418,66 +457,66 @@ const ASSEMBLY_DATA = [
     "sku": "CALL-BOX-6-PORT-CMPLT",
     "max_buildable": 4,
     "bottleneck": "Call Box",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "Call Box",
-        "qty_per": 1,
-        "available": 4,
+        "qty_per": 1.0,
+        "available": 4.0,
         "can_build": 4
       },
       {
         "name": "Call Box 6 Port Panel",
-        "qty_per": 1,
-        "available": 36,
+        "qty_per": 1.0,
+        "available": 36.0,
         "can_build": 36
       },
       {
         "name": "Call Box Blank Panel",
-        "qty_per": 3,
-        "available": 26,
+        "qty_per": 3.0,
+        "available": 26.0,
         "can_build": 8
       },
       {
         "name": "FS Raspberry PI",
-        "qty_per": 1,
-        "available": 124,
+        "qty_per": 1.0,
+        "available": 124.0,
         "can_build": 124
       },
       {
         "name": "Call Emergency Box PCB",
-        "qty_per": 1,
-        "available": 28,
+        "qty_per": 1.0,
+        "available": 28.0,
         "can_build": 28
       },
       {
         "name": "Patch Cable 1 FT Orange",
-        "qty_per": 6,
-        "available": 1694,
+        "qty_per": 6.0,
+        "available": 1694.0,
         "can_build": 282
       },
       {
         "name": "FS SD Cards",
-        "qty_per": 1,
-        "available": 44,
+        "qty_per": 1.0,
+        "available": 44.0,
         "can_build": 44
       },
       {
         "name": "Call USB C POE Splitter",
-        "qty_per": 1,
-        "available": 9,
+        "qty_per": 1.0,
+        "available": 9.0,
         "can_build": 9
       },
       {
         "name": "Call Keystone Jacks Black",
-        "qty_per": 5,
-        "available": 215,
-        "can_build": 43
+        "qty_per": 5.0,
+        "available": 65.0,
+        "can_build": 13
       },
       {
         "name": "Call Keystone Jacks Orange",
-        "qty_per": 1,
-        "available": 50,
+        "qty_per": 1.0,
+        "available": 50.0,
         "can_build": 50
       }
     ]
@@ -487,18 +526,18 @@ const ASSEMBLY_DATA = [
     "sku": "CALL-BEDSIDE-NURSE-BUTTON",
     "max_buildable": 6,
     "bottleneck": "Call Button Long Cable",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "Call Button Long Cable",
-        "qty_per": 1,
-        "available": 6,
+        "qty_per": 1.0,
+        "available": 6.0,
         "can_build": 6
       },
       {
         "name": "Call PCB Plug (for long cord)",
-        "qty_per": 1,
-        "available": 82,
+        "qty_per": 1.0,
+        "available": 82.0,
         "can_build": 82
       }
     ]
@@ -508,64 +547,25 @@ const ASSEMBLY_DATA = [
     "sku": "CALL-EMERGENCY-WALL-BUTTON-CMPLT",
     "max_buildable": 8,
     "bottleneck": "Call Emergency Button Wall",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "Call Emergency Wall Button PCB",
-        "qty_per": 1,
-        "available": 142,
+        "qty_per": 1.0,
+        "available": 142.0,
         "can_build": 142
       },
       {
         "name": "Call Emergency Button Wall",
-        "qty_per": 1,
-        "available": 8,
+        "qty_per": 1.0,
+        "available": 8.0,
         "can_build": 8
       },
       {
         "name": "Call Wall Plate",
-        "qty_per": 1,
-        "available": 23,
+        "qty_per": 1.0,
+        "available": 23.0,
         "can_build": 23
-      }
-    ]
-  },
-  {
-    "name": "Sensor Desktop",
-    "sku": "DESK-SENSOR-UNPROGRAMMED",
-    "max_buildable": 9,
-    "bottleneck": "Sensor Desktop Case",
-    "updated": "2026-06-30",
-    "components": [
-      {
-        "name": "Sensor Desktop Case",
-        "qty_per": 1,
-        "available": 9,
-        "can_build": 9
-      },
-      {
-        "name": "Sensor Desktop & Ceiling PCB",
-        "qty_per": 1,
-        "available": 546,
-        "can_build": 546
-      },
-      {
-        "name": "Sensor Lenses",
-        "qty_per": 1,
-        "available": 1303,
-        "can_build": 1303
-      },
-      {
-        "name": "Badge Screws",
-        "qty_per": 4,
-        "available": 6031,
-        "can_build": 1507
-      },
-      {
-        "name": "Self-Adhesive Clear Rubber Feet",
-        "qty_per": 4,
-        "available": 168,
-        "can_build": 42
       }
     ]
   },
@@ -574,18 +574,18 @@ const ASSEMBLY_DATA = [
     "sku": "CALL-PULL-CORD-CMPLT",
     "max_buildable": 17,
     "bottleneck": "Call Pull Cord Outlet",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "Call Pull Cord PCB",
-        "qty_per": 1,
-        "available": 451,
+        "qty_per": 1.0,
+        "available": 451.0,
         "can_build": 451
       },
       {
         "name": "Call Pull Cord Outlet",
-        "qty_per": 1,
-        "available": 17,
+        "qty_per": 1.0,
+        "available": 17.0,
         "can_build": 17
       }
     ]
@@ -595,30 +595,30 @@ const ASSEMBLY_DATA = [
     "sku": "GW-CMPLT",
     "max_buildable": 37,
     "bottleneck": "Gateway PCB",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "Gateway PCB",
-        "qty_per": 1,
-        "available": 37,
+        "qty_per": 1.0,
+        "available": 37.0,
         "can_build": 37
       },
       {
         "name": "Gateway Plastic Case",
-        "qty_per": 1,
-        "available": 58,
+        "qty_per": 1.0,
+        "available": 58.0,
         "can_build": 58
       },
       {
         "name": "Gateway Helical Antenna",
-        "qty_per": 1,
-        "available": 54,
+        "qty_per": 1.0,
+        "available": 54.0,
         "can_build": 54
       },
       {
         "name": "Gateway Type C USB Cable, 6 inch (White)",
-        "qty_per": 1,
-        "available": 42,
+        "qty_per": 1.0,
+        "available": 42.0,
         "can_build": 42
       }
     ]
@@ -628,43 +628,43 @@ const ASSEMBLY_DATA = [
     "sku": "CB-CMPLT",
     "max_buildable": 79,
     "bottleneck": "Badge Clip Batteries",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "Badge Clip Batteries",
-        "qty_per": 1,
-        "available": 79,
+        "qty_per": 1.0,
+        "available": 79.0,
         "can_build": 79
       },
       {
         "name": "Badge Clip Buttons",
-        "qty_per": 1,
-        "available": 152,
+        "qty_per": 1.0,
+        "available": 152.0,
         "can_build": 152
       },
       {
         "name": "Badge Clip Cases",
-        "qty_per": 1,
-        "available": 138,
+        "qty_per": 1.0,
+        "available": 138.0,
         "can_build": 138
       },
       {
         "name": "Badge Clip PCB",
-        "qty_per": 1,
-        "available": 143,
+        "qty_per": 1.0,
+        "available": 143.0,
         "can_build": 143
       },
       {
         "name": "Badge Clip Rings",
-        "qty_per": 1,
-        "available": 527,
+        "qty_per": 1.0,
+        "available": 527.0,
         "can_build": 527
       },
       {
         "name": "Badge Screws",
-        "qty_per": 4,
-        "available": 6031,
-        "can_build": 1507
+        "qty_per": 4.0,
+        "available": 5939.0,
+        "can_build": 1484
       }
     ]
   },
@@ -673,37 +673,37 @@ const ASSEMBLY_DATA = [
     "sku": "CEIL-SENSOR-CMPLT",
     "max_buildable": 393,
     "bottleneck": "Sensor Ceiling Case",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "Sensor Ceiling Metal Plate",
-        "qty_per": 1,
-        "available": 920,
+        "qty_per": 1.0,
+        "available": 920.0,
         "can_build": 920
       },
       {
         "name": "Sensor Ceiling Case",
-        "qty_per": 1,
-        "available": 393,
+        "qty_per": 1.0,
+        "available": 393.0,
         "can_build": 393
       },
       {
         "name": "Sensor Ceiling Screws",
-        "qty_per": 4,
-        "available": 3117,
+        "qty_per": 4.0,
+        "available": 3117.0,
         "can_build": 779
       },
       {
         "name": "Sensor Ceiling Springs",
-        "qty_per": 2,
-        "available": 2406,
+        "qty_per": 2.0,
+        "available": 2406.0,
         "can_build": 1203
       },
       {
         "name": "Sensor Desktop & Ceiling PCB",
-        "qty_per": 1,
-        "available": 546,
-        "can_build": 546
+        "qty_per": 1.0,
+        "available": 523.0,
+        "can_build": 523
       }
     ]
   },
@@ -712,36 +712,36 @@ const ASSEMBLY_DATA = [
     "sku": "SB-FULL-CMPLT",
     "max_buildable": 454,
     "bottleneck": "Badge Safety Button",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "Badge Screws",
-        "qty_per": 7,
-        "available": 6031,
-        "can_build": 861
+        "qty_per": 7.0,
+        "available": 5939.0,
+        "can_build": 848
       },
       {
         "name": "Badge Full Size Battery",
-        "qty_per": 1,
-        "available": 1185,
+        "qty_per": 1.0,
+        "available": 1185.0,
         "can_build": 1185
       },
       {
         "name": "Case Badge Full Size",
-        "qty_per": 1,
-        "available": 1132,
+        "qty_per": 1.0,
+        "available": 1132.0,
         "can_build": 1132
       },
       {
         "name": "Badge PCB",
-        "qty_per": 1,
-        "available": 1343,
+        "qty_per": 1.0,
+        "available": 1343.0,
         "can_build": 1343
       },
       {
         "name": "Badge Safety Button",
-        "qty_per": 1,
-        "available": 454,
+        "qty_per": 1.0,
+        "available": 454.0,
         "can_build": 454
       }
     ]
@@ -751,168 +751,147 @@ const ASSEMBLY_DATA = [
     "sku": "SB-MINI-CMPLT",
     "max_buildable": 454,
     "bottleneck": "Badge Safety Button",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "Badge PCB",
-        "qty_per": 1,
-        "available": 1343,
+        "qty_per": 1.0,
+        "available": 1343.0,
         "can_build": 1343
       },
       {
         "name": "Badge Screws",
-        "qty_per": 4,
-        "available": 6031,
-        "can_build": 1507
+        "qty_per": 4.0,
+        "available": 5939.0,
+        "can_build": 1484
       },
       {
         "name": "Case Badge Mini",
-        "qty_per": 1,
-        "available": 1768,
+        "qty_per": 1.0,
+        "available": 1768.0,
         "can_build": 1768
       },
       {
         "name": "Badge Safety Button",
-        "qty_per": 1,
-        "available": 454,
+        "qty_per": 1.0,
+        "available": 454.0,
         "can_build": 454
       },
       {
         "name": "Badge Mini Battery",
-        "qty_per": 1,
-        "available": 1818,
+        "qty_per": 1.0,
+        "available": 1818.0,
         "can_build": 1818
-      }
-    ]
-  },
-  {
-    "name": "Sensor Tablet",
-    "sku": "TAB-SENSOR-CMPLT",
-    "max_buildable": 651,
-    "bottleneck": "Sensor Lenses",
-    "updated": "2026-06-30",
-    "components": [
-      {
-        "name": "Sensor Lenses",
-        "qty_per": 2,
-        "available": 1303,
-        "can_build": 651
-      },
-      {
-        "name": "Sensor Tablet PCB",
-        "qty_per": 1,
-        "available": 1305,
-        "can_build": 1305
       }
     ]
   },
   {
     "name": "Sensor Plugin",
     "sku": "PLUGIN-SENSOR",
-    "max_buildable": 684,
+    "max_buildable": 597,
     "bottleneck": "Sensor Plugin PCB",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "Sensor Lenses",
-        "qty_per": 1,
-        "available": 1303,
-        "can_build": 1303
+        "qty_per": 1.0,
+        "available": 2193.0,
+        "can_build": 2193
       },
       {
         "name": "Sensor Plugin PCB",
-        "qty_per": 1,
-        "available": 684,
-        "can_build": 684
+        "qty_per": 1.0,
+        "available": 597.0,
+        "can_build": 597
       },
       {
         "name": "Sensor Plugin Case",
-        "qty_per": 1,
-        "available": 1624,
-        "can_build": 1624
+        "qty_per": 1.0,
+        "available": 1537.0,
+        "can_build": 1537
       }
     ]
   },
   {
     "name": "Stat Tag - White",
     "sku": "STAT-TAG-CMPLT",
-    "max_buildable": 730,
+    "max_buildable": 729,
     "bottleneck": "Stat Tag Screws",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "Stat Tag Batteries",
-        "qty_per": 1,
-        "available": 4600,
-        "can_build": 4600
+        "qty_per": 1.0,
+        "available": 4599.0,
+        "can_build": 4599
       },
       {
         "name": "Stat Tag PCB (1.0)",
-        "qty_per": 1,
-        "available": 1239,
-        "can_build": 1239
+        "qty_per": 1.0,
+        "available": 1238.0,
+        "can_build": 1238
       },
       {
         "name": "Stat Tag Screws",
-        "qty_per": 4,
-        "available": 2922,
-        "can_build": 730
+        "qty_per": 4.0,
+        "available": 2918.0,
+        "can_build": 729
       },
       {
         "name": "Stat Tag Shoulder Pads",
-        "qty_per": 2,
-        "available": 8415,
-        "can_build": 4207
+        "qty_per": 2.0,
+        "available": 8413.0,
+        "can_build": 4206
       },
       {
         "name": "Stat Tag White Case",
-        "qty_per": 1,
-        "available": 4316,
-        "can_build": 4316
+        "qty_per": 1.0,
+        "available": 4315.0,
+        "can_build": 4315
       }
     ]
   },
   {
     "name": "Stat Tag - White (with badge strap)",
     "sku": "ST-WHITE-STRAP-CMPLT",
-    "max_buildable": 730,
+    "max_buildable": 729,
     "bottleneck": "Stat Tag Screws",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "Stat Tag Batteries",
-        "qty_per": 1,
-        "available": 4600,
-        "can_build": 4600
+        "qty_per": 1.0,
+        "available": 4599.0,
+        "can_build": 4599
       },
       {
         "name": "Stat Tag PCB (1.0)",
-        "qty_per": 1,
-        "available": 1239,
-        "can_build": 1239
+        "qty_per": 1.0,
+        "available": 1238.0,
+        "can_build": 1238
       },
       {
         "name": "Stat Tag Screws",
-        "qty_per": 4,
-        "available": 2922,
-        "can_build": 730
+        "qty_per": 4.0,
+        "available": 2918.0,
+        "can_build": 729
       },
       {
         "name": "Stat Tag Shoulder Pads",
-        "qty_per": 2,
-        "available": 8415,
-        "can_build": 4207
+        "qty_per": 2.0,
+        "available": 8413.0,
+        "can_build": 4206
       },
       {
         "name": "Stat Tag White Case",
-        "qty_per": 1,
-        "available": 4316,
-        "can_build": 4316
+        "qty_per": 1.0,
+        "available": 4315.0,
+        "can_build": 4315
       },
       {
         "name": "Stat Tag Badge Straps",
-        "qty_per": 1,
-        "available": 761,
+        "qty_per": 1.0,
+        "available": 761.0,
         "can_build": 761
       }
     ]
@@ -920,27 +899,27 @@ const ASSEMBLY_DATA = [
   {
     "name": "Tablet",
     "sku": "TAB-CMPLT",
-    "max_buildable": 748,
+    "max_buildable": 730,
     "bottleneck": "Tablet USB Plug",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "Tablet (unprogrammed)",
-        "qty_per": 1,
-        "available": 2160,
-        "can_build": 2160
+        "qty_per": 1.0,
+        "available": 2142.0,
+        "can_build": 2142
       },
       {
         "name": "Dot Stickers (Box of 1,000)",
-        "qty_per": 1,
-        "available": 953,
-        "can_build": 953
+        "qty_per": 1.0,
+        "available": 935.0,
+        "can_build": 935
       },
       {
         "name": "Tablet USB Plug",
-        "qty_per": 1,
-        "available": 748,
-        "can_build": 748
+        "qty_per": 1.0,
+        "available": 730.0,
+        "can_build": 730
       }
     ]
   },
@@ -949,24 +928,24 @@ const ASSEMBLY_DATA = [
     "sku": "CONSOL-SENSOR",
     "max_buildable": 1000,
     "bottleneck": "Consolidated Sensor PCB",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "Consolidated Sensor Front & Back",
-        "qty_per": 1,
-        "available": 2000,
+        "qty_per": 1.0,
+        "available": 2000.0,
         "can_build": 2000
       },
       {
         "name": "Consolidated Sensor PCB",
-        "qty_per": 1,
-        "available": 1000,
+        "qty_per": 1.0,
+        "available": 1000.0,
         "can_build": 1000
       },
       {
         "name": "Consolidated Sensor Shoulders",
-        "qty_per": 2,
-        "available": 2000,
+        "qty_per": 2.0,
+        "available": 2000.0,
         "can_build": 1000
       }
     ]
@@ -976,31 +955,52 @@ const ASSEMBLY_DATA = [
     "sku": "CONSOL-CEIL-SENSOR",
     "max_buildable": 1000,
     "bottleneck": "Consolidated Sensor PCB",
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "components": [
       {
         "name": "Consolidated Sensor PCB",
-        "qty_per": 1,
-        "available": 1000,
+        "qty_per": 1.0,
+        "available": 1000.0,
         "can_build": 1000
       },
       {
         "name": "Consolidated Sensor Mounting Bracket",
-        "qty_per": 1,
-        "available": 1000,
+        "qty_per": 1.0,
+        "available": 1000.0,
         "can_build": 1000
       },
       {
         "name": "Consolidated Sensor Shoulders",
-        "qty_per": 2,
-        "available": 2000,
+        "qty_per": 2.0,
+        "available": 2000.0,
         "can_build": 1000
       },
       {
         "name": "Consolidated Sensor Front & Back",
-        "qty_per": 1,
-        "available": 2000,
+        "qty_per": 1.0,
+        "available": 2000.0,
         "can_build": 2000
+      }
+    ]
+  },
+  {
+    "name": "Sensor Tablet",
+    "sku": "TAB-SENSOR-CMPLT",
+    "max_buildable": 1096,
+    "bottleneck": "Sensor Lenses",
+    "updated": "2026-07-01",
+    "components": [
+      {
+        "name": "Sensor Lenses",
+        "qty_per": 2.0,
+        "available": 2193.0,
+        "can_build": 1096
+      },
+      {
+        "name": "Sensor Tablet PCB",
+        "qty_per": 1.0,
+        "available": 1305.0,
+        "can_build": 1305
       }
     ]
   }
