@@ -11,191 +11,78 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Assembly Availability — stat.io</title>
 <style>
-  /* Reskinned to match the Stat Inventory Dashboard's palette/typography (see the
-     Next.js app's app/globals.css) — every selector name below is unchanged from
-     the original file (only property values changed), since renderSummary(),
-     renderItems(), and setFilter() in the script further down build class strings
-     like "item-card red" / "badge yellow" / "filter-btn active-green" by hand.
-     Renaming any class here without also editing that JS would silently break the
-     styling, so don't rename selectors when tweaking this block further — only the
-     values. Same reasoning protects the #summary/#itemsGrid/#searchInput/#updatedAt
-     element IDs, the ASSEMBLY_DATA variable, and the "DATA_PLACEHOLDER" comment
-     below: the daily assembly-dashboard-refresh scheduled task presumably finds/
-     replaces around those exact hooks, so none of them changed here either. */
-  :root {
-    color-scheme: light;
-    --bg: #FFFFFF;
-    --panel: #EBF2FF;
-    --panel-hover: #DCE6FF;
-    --panel-border: #F5EDD8;
-    --panel-border-strong: #2a3266;
-    --text: #14192B;
-    --muted: #5A6178;
-    --muted-dim: #5b6280;
-    --brand-blue: #2f43f0;
-    --brand-teal: #00e6b8;
-    --brand-teal-dim: #00997b;
-    --brand-gradient: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-teal) 100%);
-    --good: #00e6b8;
-    --warn: #fbbf24;
-    --bad: #fb7373;
-    --accent-detail: #1895d4; /* same "detail page" accent used on In-Stock/Fill Rate/Inventory Health */
-    --radius: 14px;
-  }
+  :root { color-scheme: light; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    background: var(--bg);
-    color: var(--text);
-    font-size: 14px;
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: 36px 28px 80px;
-  }
-  a { color: inherit; }
-  h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; color: var(--text); margin-bottom: 28px; }
-  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
-  .summary-card {
-    position: relative;
-    background: var(--panel);
-    border: 1px solid var(--panel-border);
-    border-top: 3px solid var(--accent-detail);
-    border-radius: var(--radius);
-    padding: 18px;
-    cursor: pointer;
-    overflow: hidden;
-    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
-  }
-  .summary-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: var(--brand-gradient);
-    opacity: 0.06;
-    pointer-events: none;
-  }
-  .summary-card:hover { transform: translateY(-3px); border-color: var(--brand-teal); box-shadow: 0 10px 28px rgba(20, 25, 43, 0.12); }
-  .summary-card .count { font-size: 28px; font-weight: 700; line-height: 1; letter-spacing: -0.02em; position: relative; }
-  .summary-card .label { font-size: 11px; margin-top: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); position: relative; }
-  .card-red, .card-yellow, .card-green, .card-total { background: var(--panel); border-color: var(--panel-border); }
-  /* Labels used to lead with a colored circle emoji (🔴/🟡/🟢) as the status cue —
-     removed in favor of coloring the label text itself directly. */
-  .card-red .label { color: var(--bad); }
-  .card-yellow .label { color: #a16207; }
-  .card-green .label { color: var(--brand-teal-dim); }
-  .count-red { color: var(--bad); }
-  .count-yellow { color: var(--warn); }
-  .count-green { color: var(--good); }
-  .count-total { color: var(--brand-teal); }
-  .controls { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
-  .search {
-    flex: 1;
-    min-width: 200px;
-    background: var(--bg);
-    border: 1px solid var(--panel-border);
-    border-radius: 999px;
-    padding: 8px 16px;
-    color: var(--text);
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-  }
-  .search:focus { border-color: var(--brand-teal); box-shadow: 0 0 0 2px rgba(0, 230, 184, 0.15); }
-  .filter-btn {
-    padding: 8px 14px;
-    border-radius: 999px;
-    border: 1px solid var(--panel-border);
-    background: var(--bg);
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: color 0.15s, background 0.15s, border-color 0.15s;
-  }
-  .filter-btn:hover { color: var(--text); background: var(--panel-hover); }
-  .filter-btn.active-all { background: var(--panel); border-color: var(--panel-border-strong); color: var(--text); }
-  /* Same swap as the summary labels above — the button text itself carries the
-     status color at all times (not just once active), rather than relying on a
-     colored circle emoji next to neutral gray text. */
-  #btn-red { color: var(--bad); }
-  #btn-yellow { color: #a16207; }
-  #btn-green { color: var(--brand-teal-dim); }
-  .filter-btn.active-red { background: var(--panel); border-color: var(--bad); color: var(--bad); }
-  .filter-btn.active-yellow { background: var(--panel); border-color: var(--warn); color: #a16207; }
-  .filter-btn.active-green { background: var(--panel); border-color: var(--brand-teal); color: var(--brand-teal-dim); }
-  .items-grid { display: flex; flex-direction: column; gap: 8px; }
-  .item-card {
-    border-radius: var(--radius);
-    border: 1px solid var(--panel-border);
-    overflow: hidden;
-    cursor: pointer;
-    background: var(--panel);
-    transition: border-color 0.15s, box-shadow 0.15s;
-  }
-  .item-card:hover { border-color: var(--brand-teal); box-shadow: 0 6px 18px rgba(20, 25, 43, 0.08); }
-  .item-card.red { border-left: 3px solid var(--bad); }
-  .item-card.yellow { border-left: 3px solid var(--warn); }
-  .item-card.green { border-left: 3px solid var(--brand-teal); }
-  .item-header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 46px;
-    height: 32px;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 700;
-    padding: 0 8px;
-    flex-shrink: 0;
-  }
-  .badge.red { background: rgba(251, 115, 115, 0.14); color: var(--bad); }
-  .badge.yellow { background: rgba(251, 191, 36, 0.16); color: #a16207; }
-  .badge.green { background: rgba(0, 230, 184, 0.14); color: var(--brand-teal-dim); }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; padding: 16px; font-size: 14px; }
+  h1 { font-size: 17px; font-weight: 700; color: #0f172a; }
+  .subtitle { color: #64748b; font-size: 12px; margin-top: 2px; margin-bottom: 14px; }
+  .summary { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .summary-card { flex: 1; min-width: 80px; border-radius: 10px; padding: 10px 12px; cursor: pointer; transition: opacity 0.15s; }
+  .summary-card:hover { opacity: 0.85; }
+  .summary-card .count { font-size: 26px; font-weight: 800; line-height: 1; }
+  .summary-card .label { font-size: 11px; margin-top: 3px; font-weight: 500; }
+  .card-red { background: #fef2f2; border: 1px solid #fecaca; }
+  .card-yellow { background: #fefce8; border: 1px solid #fde68a; }
+  .card-green { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .card-total { background: #f1f5f9; border: 1px solid #e2e8f0; }
+  .count-red { color: #dc2626; }
+  .count-yellow { color: #ca8a04; }
+  .count-green { color: #16a34a; }
+  .count-total { color: #475569; }
+  .controls { display: flex; gap: 7px; margin-bottom: 11px; flex-wrap: wrap; align-items: center; }
+  .search { flex: 1; min-width: 150px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 11px; color: #1e293b; font-size: 13px; outline: none; }
+  .search:focus { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.15); }
+  .filter-btn { padding: 6px 11px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #475569; font-size: 12px; cursor: pointer; transition: all 0.12s; font-weight: 500; }
+  .filter-btn:hover { background: #f1f5f9; }
+  .filter-btn.active-all { background: #eef2ff; border-color: #a5b4fc; color: #4338ca; }
+  .filter-btn.active-red { background: #fef2f2; border-color: #fca5a5; color: #dc2626; }
+  .filter-btn.active-yellow { background: #fefce8; border-color: #fde68a; color: #ca8a04; }
+  .filter-btn.active-green { background: #f0fdf4; border-color: #86efac; color: #16a34a; }
+  .items-grid { display: flex; flex-direction: column; gap: 5px; }
+  .item-card { border-radius: 9px; border: 1px solid; overflow: hidden; cursor: pointer; transition: box-shadow 0.1s; background: #fff; }
+  .item-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .item-card.red { border-color: #fecaca; }
+  .item-card.yellow { border-color: #fde68a; }
+  .item-card.green { border-color: #bbf7d0; }
+  .item-header { display: flex; align-items: center; gap: 10px; padding: 9px 12px; }
+  .badge { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 30px; border-radius: 7px; font-size: 15px; font-weight: 800; padding: 0 6px; flex-shrink: 0; }
+  .badge.red { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+  .badge.yellow { background: #fefce8; color: #ca8a04; border: 1px solid #fde68a; }
+  .badge.green { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
   .item-info { flex: 1; min-width: 0; }
-  .item-name { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
-  .item-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .expand-icon { font-size: 11px; color: var(--muted-dim); flex-shrink: 0; transition: transform 0.2s; }
+  .item-name { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0f172a; }
+  .item-meta { font-size: 11px; color: #64748b; margin-top: 2px; }
+  .expand-icon { font-size: 11px; color: #94a3b8; flex-shrink: 0; transition: transform 0.2s; }
   .item-card.expanded .expand-icon { transform: rotate(180deg); }
-  .item-detail { display: none; padding: 0 16px 14px; }
+  .item-detail { display: none; padding: 0 12px 10px; }
   .item-card.expanded .item-detail { display: block; }
-  .comp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .comp-table th {
-    text-align: left;
-    padding: 8px 10px;
-    color: var(--muted);
-    font-weight: 500;
-    border-bottom: 1px solid var(--panel-border);
-    font-size: 11.5px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-  .comp-table td { padding: 8px 10px; border-bottom: 1px solid rgba(20, 25, 43, 0.05); color: var(--text); vertical-align: middle; }
+  .comp-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .comp-table th { text-align: left; padding: 4px 7px; color: #94a3b8; font-weight: 500; border-bottom: 1px solid #f1f5f9; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .comp-table td { padding: 4px 7px; border-bottom: 1px solid #f8fafc; color: #334155; }
   .comp-table tr:last-child td { border-bottom: none; }
-  .comp-table tr.bottleneck-row td { font-weight: 600; background: rgba(251, 115, 115, 0.08); }
+  .comp-table tr.bottleneck-row td { font-weight: 600; background: #fef2f2; }
   .comp-table tr.bottleneck-row td:first-child::before { content: "⚠ "; }
-  .can-build-val { font-weight: 700; font-variant-numeric: tabular-nums; }
-  .can-build-val.limiting { color: var(--bad); }
-  .can-build-val.ok { color: var(--brand-teal-dim); }
-  .no-results { text-align: center; padding: 32px; color: var(--muted); font-size: 13px; }
-  .updated-bar { display: flex; align-items: center; justify-content: space-between; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--panel-border); flex-wrap: wrap; gap: 8px; }
-  .updated-text { font-size: 12px; color: var(--muted-dim); }
-  .refresh-note { font-size: 12px; color: var(--brand-teal-dim); font-weight: 600; }
+  .can-build-val { font-weight: 700; }
+  .can-build-val.limiting { color: #dc2626; }
+  .can-build-val.ok { color: #16a34a; }
+  .no-results { text-align: center; padding: 28px; color: #94a3b8; font-size: 13px; }
+  .updated-bar { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 8px; border-top: 1px solid #f1f5f9; }
+  .updated-text { font-size: 11px; color: #94a3b8; }
+  .refresh-note { font-size: 11px; color: #6366f1; font-weight: 500; }
 </style>
 </head>
 <body>
 <h1>Assembly Availability</h1>
+<p class="subtitle">Buildable units per product based on BOM component stock in Zoho Inventory</p>
 
 <div class="summary" id="summary"></div>
 
 <div class="controls">
   <input class="search" type="text" placeholder="Search products or components..." id="searchInput" oninput="filterItems()">
   <button class="filter-btn active-all" id="btn-all" onclick="setFilter('all')">All</button>
-  <button class="filter-btn" id="btn-red" onclick="setFilter('red')">Critical</button>
-  <button class="filter-btn" id="btn-yellow" onclick="setFilter('yellow')">Low</button>
-  <button class="filter-btn" id="btn-green" onclick="setFilter('green')">Healthy</button>
+  <button class="filter-btn" id="btn-red" onclick="setFilter('red')">🔴 Critical</button>
+  <button class="filter-btn" id="btn-yellow" onclick="setFilter('yellow')">🟡 Low</button>
+  <button class="filter-btn" id="btn-green" onclick="setFilter('green')">🟢 Healthy</button>
 </div>
 
 <div class="items-grid" id="itemsGrid"></div>
@@ -213,7 +100,7 @@ const ASSEMBLY_DATA = [
     "sku": "CB-CMPLT",
     "max_buildable": 79,
     "bottleneck": "Badge Clip Batteries",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Badge Clip Batteries",
@@ -258,7 +145,7 @@ const ASSEMBLY_DATA = [
     "sku": "SB-FULL-CMPLT",
     "max_buildable": 454,
     "bottleneck": "Badge Safety Button",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Badge Screws",
@@ -297,7 +184,7 @@ const ASSEMBLY_DATA = [
     "sku": "SB-MINI-CMPLT",
     "max_buildable": 454,
     "bottleneck": "Badge Safety Button",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Badge PCB",
@@ -336,7 +223,7 @@ const ASSEMBLY_DATA = [
     "sku": "CALL-BEDSIDE-NURSE-BUTTON",
     "max_buildable": 2,
     "bottleneck": "Call Button Long Cable",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Call Button Long Cable",
@@ -355,270 +242,270 @@ const ASSEMBLY_DATA = [
   {
     "name": "Call Box 12 Port",
     "sku": "CALL-BOX-12-PORT-CMPLT",
-    "max_buildable": 3,
+    "max_buildable": 2,
     "bottleneck": "Call Box",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Call Box",
         "qty_per": 1,
-        "available": 3,
-        "can_build": 3
+        "available": 2,
+        "can_build": 2
       },
       {
         "name": "Call Box 6 Port Panel",
         "qty_per": 2,
-        "available": 34,
-        "can_build": 17
+        "available": 32,
+        "can_build": 16
       },
       {
         "name": "Call Box Blank Panel",
         "qty_per": 2,
-        "available": 24,
-        "can_build": 12
+        "available": 22,
+        "can_build": 11
       },
       {
         "name": "FS Raspberry PI",
         "qty_per": 1,
-        "available": 123,
-        "can_build": 123
+        "available": 122,
+        "can_build": 122
       },
       {
         "name": "FS SD Cards",
         "qty_per": 1,
-        "available": 40,
-        "can_build": 40
+        "available": 39,
+        "can_build": 39
       },
       {
         "name": "Call USB C POE Splitter",
         "qty_per": 1,
-        "available": 8,
-        "can_build": 8
+        "available": 7,
+        "can_build": 7
       },
       {
         "name": "Call Emergency Box PCB",
         "qty_per": 1,
-        "available": 27,
-        "can_build": 27
+        "available": 26,
+        "can_build": 26
       },
       {
         "name": "Patch Cable 1 FT Orange",
         "qty_per": 12,
-        "available": 733,
-        "can_build": 61
+        "available": 559,
+        "can_build": 46
       },
       {
         "name": "Call Keystone Jacks Black",
         "qty_per": 11,
-        "available": 54,
-        "can_build": 4
+        "available": 43,
+        "can_build": 3
       },
       {
         "name": "Call Keystone Jacks Orange",
         "qty_per": 1,
-        "available": 49,
-        "can_build": 49
+        "available": 48,
+        "can_build": 48
       }
     ]
   },
   {
     "name": "Call Box 18 Port",
     "sku": "CALL-BOX-18-PORT-CMPLT",
-    "max_buildable": 3,
+    "max_buildable": 2,
     "bottleneck": "Call Box",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Call Box",
         "qty_per": 1,
-        "available": 3,
-        "can_build": 3
+        "available": 2,
+        "can_build": 2
       },
       {
         "name": "Call Box 6 Port Panel",
         "qty_per": 3,
-        "available": 34,
-        "can_build": 11
+        "available": 32,
+        "can_build": 10
       },
       {
         "name": "Call Box Blank Panel",
         "qty_per": 1,
-        "available": 24,
-        "can_build": 24
+        "available": 22,
+        "can_build": 22
       },
       {
         "name": "FS Raspberry PI",
         "qty_per": 1,
-        "available": 123,
-        "can_build": 123
+        "available": 122,
+        "can_build": 122
       },
       {
         "name": "FS SD Cards",
         "qty_per": 1,
-        "available": 40,
-        "can_build": 40
+        "available": 39,
+        "can_build": 39
       },
       {
         "name": "Call USB C POE Splitter",
         "qty_per": 1,
-        "available": 8,
-        "can_build": 8
+        "available": 7,
+        "can_build": 7
       },
       {
         "name": "Call Emergency Box PCB",
         "qty_per": 1,
-        "available": 27,
-        "can_build": 27
+        "available": 26,
+        "can_build": 26
       },
       {
         "name": "Patch Cable 1 FT Orange",
         "qty_per": 18,
-        "available": 733,
-        "can_build": 40
+        "available": 559,
+        "can_build": 31
       },
       {
         "name": "Call Keystone Jacks Black",
         "qty_per": 17,
-        "available": 54,
-        "can_build": 3
+        "available": 43,
+        "can_build": 2
       },
       {
         "name": "Call Keystone Jacks Orange",
         "qty_per": 1,
-        "available": 49,
-        "can_build": 49
+        "available": 48,
+        "can_build": 48
       }
     ]
   },
   {
     "name": "Call Box 24 Port",
     "sku": "CALL-BOX-24-PORT-CMPLT",
-    "max_buildable": 2,
+    "max_buildable": 1,
     "bottleneck": "Call Keystone Jacks Black",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Call Box",
         "qty_per": 1,
-        "available": 3,
-        "can_build": 3
+        "available": 2,
+        "can_build": 2
       },
       {
         "name": "Call Box 6 Port Panel",
         "qty_per": 4,
-        "available": 34,
+        "available": 32,
         "can_build": 8
       },
       {
         "name": "FS Raspberry PI",
         "qty_per": 1,
-        "available": 123,
-        "can_build": 123
+        "available": 122,
+        "can_build": 122
       },
       {
         "name": "FS SD Cards",
         "qty_per": 1,
-        "available": 40,
-        "can_build": 40
+        "available": 39,
+        "can_build": 39
       },
       {
         "name": "Call USB C POE Splitter",
         "qty_per": 1,
-        "available": 8,
-        "can_build": 8
+        "available": 7,
+        "can_build": 7
       },
       {
         "name": "Call Emergency Box PCB",
         "qty_per": 1,
-        "available": 27,
-        "can_build": 27
+        "available": 26,
+        "can_build": 26
       },
       {
         "name": "Patch Cable 1 FT Orange",
         "qty_per": 24,
-        "available": 733,
-        "can_build": 30
+        "available": 559,
+        "can_build": 23
       },
       {
         "name": "Call Keystone Jacks Black",
         "qty_per": 23,
-        "available": 54,
-        "can_build": 2
+        "available": 43,
+        "can_build": 1
       },
       {
         "name": "Call Keystone Jacks Orange",
         "qty_per": 1,
-        "available": 49,
-        "can_build": 49
+        "available": 48,
+        "can_build": 48
       }
     ]
   },
   {
     "name": "Call Box 6 Port",
     "sku": "CALL-BOX-6-PORT-CMPLT",
-    "max_buildable": 3,
+    "max_buildable": 2,
     "bottleneck": "Call Box",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Call Box",
         "qty_per": 1,
-        "available": 3,
-        "can_build": 3
+        "available": 2,
+        "can_build": 2
       },
       {
         "name": "Call Box 6 Port Panel",
         "qty_per": 1,
-        "available": 34,
-        "can_build": 34
+        "available": 32,
+        "can_build": 32
       },
       {
         "name": "Call Box Blank Panel",
         "qty_per": 3,
-        "available": 24,
-        "can_build": 8
+        "available": 22,
+        "can_build": 7
       },
       {
         "name": "FS Raspberry PI",
         "qty_per": 1,
-        "available": 123,
-        "can_build": 123
+        "available": 122,
+        "can_build": 122
       },
       {
         "name": "Call Emergency Box PCB",
         "qty_per": 1,
-        "available": 27,
-        "can_build": 27
+        "available": 26,
+        "can_build": 26
       },
       {
         "name": "Patch Cable 1 FT Orange",
         "qty_per": 6,
-        "available": 733,
-        "can_build": 122
+        "available": 559,
+        "can_build": 93
       },
       {
         "name": "FS SD Cards",
         "qty_per": 1,
-        "available": 40,
-        "can_build": 40
+        "available": 39,
+        "can_build": 39
       },
       {
         "name": "Call USB C POE Splitter",
         "qty_per": 1,
-        "available": 8,
-        "can_build": 8
+        "available": 7,
+        "can_build": 7
       },
       {
         "name": "Call Keystone Jacks Black",
         "qty_per": 5,
-        "available": 54,
-        "can_build": 10
+        "available": 43,
+        "can_build": 8
       },
       {
         "name": "Call Keystone Jacks Orange",
         "qty_per": 1,
-        "available": 49,
-        "can_build": 49
+        "available": 48,
+        "can_build": 48
       }
     ]
   },
@@ -627,7 +514,7 @@ const ASSEMBLY_DATA = [
     "sku": "CALL-EMERGENCY-WALL-BUTTON-CMPLT",
     "max_buildable": 8,
     "bottleneck": "Call Emergency Button Wall",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Call Emergency Wall Button PCB",
@@ -654,7 +541,7 @@ const ASSEMBLY_DATA = [
     "sku": "CALL-PULL-CORD-CMPLT",
     "max_buildable": 11,
     "bottleneck": "Call Pull Cord Outlet",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Call Pull Cord PCB",
@@ -675,7 +562,7 @@ const ASSEMBLY_DATA = [
     "sku": "CONSOL-SENSOR",
     "max_buildable": 918,
     "bottleneck": "Consolidated Sensor Front & Back",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Consolidated Sensor Front & Back",
@@ -700,33 +587,21 @@ const ASSEMBLY_DATA = [
   {
     "name": "Consolidated Sensor Ceiling",
     "sku": "CONSOL-CEIL-SENSOR",
-    "max_buildable": 918,
-    "bottleneck": "Consolidated Sensor PCB",
-    "updated": "2026-08-19",
+    "max_buildable": 71,
+    "bottleneck": "Consolidated Sensor",
+    "updated": "2026-08-22",
     "components": [
       {
-        "name": "Consolidated Sensor PCB",
+        "name": "Consolidated Sensor",
         "qty_per": 1,
-        "available": 918,
-        "can_build": 918
+        "available": 71,
+        "can_build": 71
       },
       {
         "name": "Consolidated Sensor Mounting Bracket",
         "qty_per": 1,
         "available": 987,
         "can_build": 987
-      },
-      {
-        "name": "Consolidated Sensor Shoulders",
-        "qty_per": 2,
-        "available": 1836,
-        "can_build": 918
-      },
-      {
-        "name": "Consolidated Sensor Front & Back",
-        "qty_per": 1,
-        "available": 918,
-        "can_build": 918
       }
     ]
   },
@@ -735,13 +610,13 @@ const ASSEMBLY_DATA = [
     "sku": "CONSOL-PLUGIN-SENSOR",
     "max_buildable": 71,
     "bottleneck": "Consolidated Sensor",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "USB Wall Plug",
         "qty_per": 1,
-        "available": 221,
-        "can_build": 221
+        "available": 183,
+        "can_build": 183
       },
       {
         "name": "Consolidated Sensor",
@@ -756,7 +631,7 @@ const ASSEMBLY_DATA = [
     "sku": "FS-REPLACEMENT-PACK",
     "max_buildable": 1,
     "bottleneck": "FS Burned Box",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "FS Burned Box",
@@ -795,13 +670,13 @@ const ASSEMBLY_DATA = [
     "sku": "FS-PACK",
     "max_buildable": 1,
     "bottleneck": "FS Burned Box",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "FS Wireless Keyboard Mouse Combo",
         "qty_per": 1,
-        "available": 20,
-        "can_build": 20
+        "available": 60,
+        "can_build": 60
       },
       {
         "name": "FS HDMI Cable",
@@ -852,7 +727,7 @@ const ASSEMBLY_DATA = [
     "sku": "GW-CMPLT",
     "max_buildable": 0,
     "bottleneck": "Gateway Plastic Case",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Gateway PCB",
@@ -885,7 +760,7 @@ const ASSEMBLY_DATA = [
     "sku": "CEIL-SENSOR-CMPLT",
     "max_buildable": 357,
     "bottleneck": "Sensor Ceiling Case",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Sensor Ceiling Metal Plate",
@@ -924,7 +799,7 @@ const ASSEMBLY_DATA = [
     "sku": "DESK-SENSOR-UNPROGRAMMED",
     "max_buildable": 30,
     "bottleneck": "Sensor Desktop Case",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Sensor Desktop Case",
@@ -941,8 +816,8 @@ const ASSEMBLY_DATA = [
       {
         "name": "Sensor Lenses",
         "qty_per": 1,
-        "available": 665,
-        "can_build": 665
+        "available": 420,
+        "can_build": 420
       },
       {
         "name": "Badge Screws",
@@ -961,42 +836,42 @@ const ASSEMBLY_DATA = [
   {
     "name": "Sensor Plugin",
     "sku": "PLUGIN-SENSOR",
-    "max_buildable": 559,
+    "max_buildable": 314,
     "bottleneck": "Sensor Plugin PCB",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Sensor Lenses",
         "qty_per": 1,
-        "available": 665,
-        "can_build": 665
+        "available": 420,
+        "can_build": 420
       },
       {
         "name": "Sensor Plugin PCB",
         "qty_per": 1,
-        "available": 559,
-        "can_build": 559
+        "available": 314,
+        "can_build": 314
       },
       {
         "name": "Sensor Plugin Case",
         "qty_per": 1,
-        "available": 1465,
-        "can_build": 1465
+        "available": 1220,
+        "can_build": 1220
       }
     ]
   },
   {
     "name": "Sensor Tablet",
     "sku": "TAB-SENSOR-CMPLT",
-    "max_buildable": 332,
+    "max_buildable": 210,
     "bottleneck": "Sensor Lenses",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Sensor Lenses",
         "qty_per": 2,
-        "available": 665,
-        "can_build": 332
+        "available": 420,
+        "can_build": 210
       },
       {
         "name": "Sensor Tablet PCB",
@@ -1009,111 +884,111 @@ const ASSEMBLY_DATA = [
   {
     "name": "Stat Tag - White (NO STRAP)",
     "sku": "STAT-TAG-CMPLT",
-    "max_buildable": 969,
+    "max_buildable": 900,
     "bottleneck": "Stat Tag PCB (2.0)",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Stat Tag Batteries",
         "qty_per": 1,
-        "available": 6675,
-        "can_build": 6675
+        "available": 6606,
+        "can_build": 6606
       },
       {
         "name": "Stat Tag Screws",
         "qty_per": 4,
-        "available": 18222,
-        "can_build": 4555
+        "available": 17946,
+        "can_build": 4486
       },
       {
         "name": "Stat Tag Shoulder Pads",
         "qty_per": 2,
-        "available": 2565,
-        "can_build": 1282
+        "available": 2427,
+        "can_build": 1213
       },
       {
         "name": "Stat Tag PCB (2.0)",
         "qty_per": 1,
-        "available": 969,
-        "can_build": 969
+        "available": 900,
+        "can_build": 900
       },
       {
         "name": "Stat Tag White Case 2.0 (Ribbed)",
         "qty_per": 1,
-        "available": 4000,
-        "can_build": 4000
+        "available": 3931,
+        "can_build": 3931
       }
     ]
   },
   {
     "name": "Stat Tag - White (with badge strap)",
     "sku": "ST-WHITE-STRAP-CMPLT",
-    "max_buildable": 969,
+    "max_buildable": 900,
     "bottleneck": "Stat Tag PCB (2.0)",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Stat Tag Batteries",
         "qty_per": 1,
-        "available": 6675,
-        "can_build": 6675
+        "available": 6606,
+        "can_build": 6606
       },
       {
         "name": "Stat Tag Screws",
         "qty_per": 4,
-        "available": 18222,
-        "can_build": 4555
+        "available": 17946,
+        "can_build": 4486
       },
       {
         "name": "Stat Tag Shoulder Pads",
         "qty_per": 2,
-        "available": 2565,
-        "can_build": 1282
+        "available": 2427,
+        "can_build": 1213
       },
       {
         "name": "Stat Tag Badge Straps",
         "qty_per": 1,
-        "available": 1470,
-        "can_build": 1470
+        "available": 1401,
+        "can_build": 1401
       },
       {
         "name": "Stat Tag PCB (2.0)",
         "qty_per": 1,
-        "available": 969,
-        "can_build": 969
+        "available": 900,
+        "can_build": 900
       },
       {
         "name": "Stat Tag White Case 2.0 (Ribbed)",
         "qty_per": 1,
-        "available": 4000,
-        "can_build": 4000
+        "available": 3931,
+        "can_build": 3931
       }
     ]
   },
   {
     "name": "Tablet",
     "sku": "TAB-CMPLT",
-    "max_buildable": 447,
+    "max_buildable": 309,
     "bottleneck": "Dot Stickers (Box of 1,000)",
-    "updated": "2026-08-19",
+    "updated": "2026-08-22",
     "components": [
       {
         "name": "Tablet (unprogrammed)",
         "qty_per": 1,
-        "available": 1503,
-        "can_build": 1503
+        "available": 1362,
+        "can_build": 1362
       },
       {
         "name": "Dot Stickers (Box of 1,000)",
         "qty_per": 1,
-        "available": 447,
-        "can_build": 447
+        "available": 309,
+        "can_build": 309
       },
       {
         "name": "Tablet USB Plug",
         "qty_per": 1,
-        "available": 682,
-        "can_build": 682
+        "available": 544,
+        "can_build": 544
       }
     ]
   }
@@ -1128,9 +1003,9 @@ function renderSummary() {
   const yellow = ASSEMBLY_DATA.filter(d => getStatus(d.max_buildable) === 'yellow').length;
   const green = ASSEMBLY_DATA.filter(d => getStatus(d.max_buildable) === 'green').length;
   document.getElementById('summary').innerHTML = `
-    <div class="summary-card card-red" onclick="setFilter('red')"><div class="count count-red">${red}</div><div class="label">Can't Build</div></div>
-    <div class="summary-card card-yellow" onclick="setFilter('yellow')"><div class="count count-yellow">${yellow}</div><div class="label">Low (≤${YELLOW_THRESHOLD})</div></div>
-    <div class="summary-card card-green" onclick="setFilter('green')"><div class="count count-green">${green}</div><div class="label">Healthy</div></div>
+    <div class="summary-card card-red" onclick="setFilter('red')"><div class="count count-red">${red}</div><div class="label">🔴 Can't Build</div></div>
+    <div class="summary-card card-yellow" onclick="setFilter('yellow')"><div class="count count-yellow">${yellow}</div><div class="label">🟡 Low (≤${YELLOW_THRESHOLD})</div></div>
+    <div class="summary-card card-green" onclick="setFilter('green')"><div class="count count-green">${green}</div><div class="label">🟢 Healthy</div></div>
     <div class="summary-card card-total" onclick="setFilter('all')"><div class="count count-total">${ASSEMBLY_DATA.length}</div><div class="label">Total Products</div></div>
   `;
 }
